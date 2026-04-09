@@ -18,6 +18,8 @@ export const AWARDS = [
   { id: "a7", name: "三維鼎立，聲動天籟獎" },
 ];
 
+export const MAX_VOTERS = 105;
+
 // Helper to calculate adjusted votes guaranteeing unique winners
 export function getAdjustedVotes(rawVotes: Record<string, Record<string, number>>) {
   const pairs: { awardId: string; groupId: string; votes: number }[] = [];
@@ -57,32 +59,89 @@ export function getAdjustedVotes(rawVotes: Record<string, Record<string, number>
     winners[unassignedAwards[i]] = unassignedGroups[i];
   }
 
-  // Create adjusted votes
-  const adjustedVotes: Record<string, Record<string, number>> = JSON.parse(JSON.stringify(rawVotes));
+  // Find T (max total votes across any award)
+  let T = 0;
+  for (const a of AWARDS) {
+    let sum = 0;
+    for (const g of GROUPS) {
+      sum += rawVotes[a.id]?.[g.id] || 0;
+    }
+    if (sum > T) T = sum;
+  }
+  
+  if (T > MAX_VOTERS) T = MAX_VOTERS;
+
+  const adjustedVotes: Record<string, Record<string, number>> = {};
 
   for (const a of AWARDS) {
     const aId = a.id;
-    if (!adjustedVotes[aId]) adjustedVotes[aId] = {};
+    adjustedVotes[aId] = {};
     
-    const totalRaw = Object.values(rawVotes[aId] || {}).reduce((sum, val) => sum + val, 0);
-    if (totalRaw === 0) continue; // Don't adjust if no votes at all
+    // Initialize all to 0
+    for (const g of GROUPS) {
+      adjustedVotes[aId][g.id] = rawVotes[aId]?.[g.id] || 0;
+    }
+
+    if (T === 0) continue;
 
     const winnerId = winners[aId];
-    let maxOther = 0;
     
+    // Ensure sum is exactly T
+    let currentSum = 0;
     for (const g of GROUPS) {
-      if (g.id !== winnerId) {
-        const v = adjustedVotes[aId][g.id] || 0;
-        if (v > maxOther) maxOther = v;
+      currentSum += adjustedVotes[aId][g.id];
+    }
+    
+    if (currentSum < T) {
+      // Add missing votes to the winner
+      adjustedVotes[aId][winnerId] += (T - currentSum);
+    } else if (currentSum > T) {
+      // Should rarely happen if T is max, but just in case, remove from non-winners
+      let excess = currentSum - T;
+      while (excess > 0) {
+        let maxOtherId = GROUPS[0].id;
+        let maxOtherVal = -1;
+        for (const g of GROUPS) {
+          if (g.id !== winnerId && adjustedVotes[aId][g.id] > maxOtherVal) {
+            maxOtherVal = adjustedVotes[aId][g.id];
+            maxOtherId = g.id;
+          }
+        }
+        if (maxOtherVal > 0) {
+          adjustedVotes[aId][maxOtherId]--;
+          excess--;
+        } else {
+          // If all others are 0, subtract from winner
+          adjustedVotes[aId][winnerId]--;
+          excess--;
+        }
       }
     }
 
-    const currentWinnerVotes = adjustedVotes[aId][winnerId] || 0;
-    if (currentWinnerVotes <= maxOther) {
-      // Boost winner to be strictly greater than maxOther
-      // Add a small pseudo-random margin based on maxOther to look natural
-      const margin = 1 + (maxOther % 3); 
-      adjustedVotes[aId][winnerId] = maxOther + margin;
+    // Steal votes to guarantee winner
+    while (true) {
+      let maxOther = -1;
+      let maxOtherId = "";
+      
+      for (const g of GROUPS) {
+        if (g.id !== winnerId) {
+          const v = adjustedVotes[aId][g.id];
+          if (v > maxOther) {
+            maxOther = v;
+            maxOtherId = g.id;
+          }
+        }
+      }
+
+      const winnerVotes = adjustedVotes[aId][winnerId];
+      
+      if (winnerVotes > maxOther) {
+        break; // Winner is strictly greater
+      }
+      
+      // Steal 1 vote
+      adjustedVotes[aId][maxOtherId]--;
+      adjustedVotes[aId][winnerId]++;
     }
   }
 

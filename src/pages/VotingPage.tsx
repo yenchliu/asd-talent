@@ -217,7 +217,7 @@ export default function VotingPage() {
               ASD's Got Talent
             </h1>
             <p className="mt-3 text-zinc-600">
-              Drag and drop each group into the award you want them to win.
+              請將表演組合拖曳至獎項內進行投票並按送出
             </p>
           </div>
 

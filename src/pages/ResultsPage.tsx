@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Award, Group, Votes } from "../types";
-import { GROUPS, AWARDS, getAdjustedVotes } from "../lib/constants";
+import { GROUPS, AWARDS, getAdjustedVotes, MAX_VOTERS } from "../lib/constants";
 import { db, auth } from "../lib/firebase";
 import { collection, onSnapshot, doc, writeBatch, setDoc, getDocs, increment } from "firebase/firestore";
 import { motion, AnimatePresence } from "motion/react";
@@ -13,6 +13,7 @@ export default function ResultsPage() {
   const [awards] = useState<Award[]>(AWARDS);
   const [votes, setVotes] = useState<Votes>({});
   const [totalVoters, setTotalVoters] = useState<number>(0);
+  const totalVotersRef = useRef<number>(0);
   const [isSimulating, setIsSimulating] = useState(false);
   
   // Modal state
@@ -39,7 +40,9 @@ export default function ResultsPage() {
           maxTotal = currentAwardTotal;
         }
       });
-      setTotalVoters(maxTotal);
+      const finalTotal = Math.min(maxTotal, MAX_VOTERS);
+      setTotalVoters(finalTotal);
+      totalVotersRef.current = finalTotal;
       setVotes(getAdjustedVotes(rawVotes));
     });
 
@@ -112,6 +115,11 @@ export default function ResultsPage() {
             await batch.commit();
 
             simulationIntervalRef.current = setInterval(async () => {
+              if (totalVotersRef.current >= MAX_VOTERS) {
+                if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
+                await setDoc(doc(db, "appState", "config"), { isSimulating: false }, { merge: true });
+                return;
+              }
               try {
                 const simBatch = writeBatch(db);
                 AWARDS.forEach((award) => {
@@ -349,10 +357,10 @@ export default function ResultsPage() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-zinc-900">
-            Live Results
+            即時投票結果
           </h1>
           <p className="mt-2 text-lg text-zinc-600">
-            Real-time voting status for the Talent Show
+            一起來幫您心中的得獎者加油！
           </p>
         </div>
 
