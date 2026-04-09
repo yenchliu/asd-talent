@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Award, Group } from "../types";
-import { socket } from "../lib/socket";
+import { GROUPS, AWARDS } from "../lib/constants";
+import { db, auth } from "../lib/firebase";
+import { doc, runTransaction, increment } from "firebase/firestore";
 import { cn } from "../lib/utils";
 import { Send, Trophy, GripVertical } from "lucide-react";
 import { motion } from "motion/react";
@@ -84,8 +86,8 @@ function DroppableAward({
 }
 
 export default function VotingPage() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [awards, setAwards] = useState<Award[]>([]);
+  const [groups, setGroups] = useState<Group[]>(GROUPS);
+  const [awards, setAwards] = useState<Award[]>(AWARDS);
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeGroup, setActiveGroup] = useState<Group | null>(null);
@@ -106,12 +108,7 @@ export default function VotingPage() {
   );
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((data) => {
-        setGroups(data.groups);
-        setAwards(data.awards);
-      });
+    // Config is now loaded from constants
   }, []);
 
   const handleDragStart = (event: any) => {
@@ -149,18 +146,38 @@ export default function VotingPage() {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (Object.keys(selections).length !== awards.length) {
       alert("Please select a group for all awards before submitting.");
       return;
     }
 
+    if (!auth.currentUser) {
+      alert("Please wait for authentication to complete.");
+      return;
+    }
+
     setIsSubmitting(true);
-    socket.emit("vote:submit", selections);
     
-    setTimeout(() => {
+    try {
+      // Submit votes using transactions or batch writes
+      for (const [awardId, groupId] of Object.entries(selections)) {
+        const voteRef = doc(db, "votes", awardId);
+        await runTransaction(db, async (transaction) => {
+          const voteDoc = await transaction.get(voteRef);
+          if (!voteDoc.exists()) {
+            transaction.set(voteRef, { [groupId]: 1 });
+          } else {
+            transaction.update(voteRef, { [groupId]: increment(1) });
+          }
+        });
+      }
       navigate("/results");
-    }, 600);
+    } catch (error) {
+      console.error("Error submitting votes:", error);
+      alert("Failed to submit votes. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   const { setNodeRef: setPoolRef, isOver: isPoolOver } = useDroppable({

@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Award, Group, Votes } from "../types";
-import { socket } from "../lib/socket";
+import { GROUPS, AWARDS, getAdjustedVotes } from "../lib/constants";
+import { db, auth } from "../lib/firebase";
+import { collection, onSnapshot, doc, writeBatch, setDoc, getDocs, increment } from "firebase/firestore";
 import { motion, AnimatePresence } from "motion/react";
 import { Users, Trophy, Play, Square, RotateCcw, X, PartyPopper } from "lucide-react";
 import { cn } from "../lib/utils";
 import confetti from "canvas-confetti";
 
 export default function ResultsPage() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [awards, setAwards] = useState<Award[]>([]);
+  const [groups] = useState<Group[]>(GROUPS);
+  const [awards] = useState<Award[]>(AWARDS);
   const [votes, setVotes] = useState<Votes>({});
   const [isSimulating, setIsSimulating] = useState(false);
   
@@ -20,31 +22,32 @@ export default function ResultsPage() {
   // Ceremony state
   const [ceremonyAwardIndex, setCeremonyAwardIndex] = useState<number | null>(null);
 
+  // Simulation interval ref
+  const simulationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((data) => {
-        setGroups(data.groups);
-        setAwards(data.awards);
+    // Listen to votes
+    const unsubscribeVotes = onSnapshot(collection(db, "votes"), (snapshot) => {
+      const rawVotes: Votes = {};
+      snapshot.forEach((doc) => {
+        rawVotes[doc.id] = doc.data();
       });
-
-    fetch("/api/votes")
-      .then((res) => res.json())
-      .then((data) => {
-        setVotes(data);
-      });
-
-    socket.on("votes:update", (newVotes: Votes) => {
-      setVotes(newVotes);
+      setVotes(getAdjustedVotes(rawVotes));
     });
 
-    socket.on("simulate:status", (status: boolean) => {
-      setIsSimulating(status);
+    // Listen to appState for simulation status
+    const unsubscribeAppState = onSnapshot(doc(db, "appState", "config"), (doc) => {
+      if (doc.exists()) {
+        setIsSimulating(doc.data().isSimulating || false);
+      }
     });
 
     return () => {
-      socket.off("votes:update");
-      socket.off("simulate:status");
+      unsubscribeVotes();
+      unsubscribeAppState();
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+      }
     };
   }, []);
 
@@ -66,12 +69,66 @@ export default function ResultsPage() {
     setError("");
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     if (password === "asdadmin") {
       if (modalAction === "reset") {
-        socket.emit("vote:reset", password);
+        try {
+          const batch = writeBatch(db);
+          const votesSnapshot = await getDocs(collection(db, "votes"));
+          votesSnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+          
+          if (isSimulating) {
+            await setDoc(doc(db, "appState", "config"), { isSimulating: false }, { merge: true });
+          }
+        } catch (err) {
+          console.error("Error resetting votes:", err);
+        }
       } else if (modalAction === "simulate") {
-        socket.emit("simulate:toggle");
+        try {
+          const newSimulatingState = !isSimulating;
+          await setDoc(doc(db, "appState", "config"), { isSimulating: newSimulatingState }, { merge: true });
+          
+          if (newSimulatingState) {
+            // Start simulation locally for the admin
+            if (simulationIntervalRef.current) clearInterval(simulationIntervalRef.current);
+            
+            // Reset votes before starting
+            const batch = writeBatch(db);
+            const votesSnapshot = await getDocs(collection(db, "votes"));
+            votesSnapshot.forEach((doc) => {
+              batch.delete(doc.ref);
+            });
+            await batch.commit();
+
+            simulationIntervalRef.current = setInterval(async () => {
+              try {
+                const simBatch = writeBatch(db);
+                AWARDS.forEach((award) => {
+                  const numVotes = Math.floor(Math.random() * 3) + 1;
+                  for (let i = 0; i < numVotes; i++) {
+                    const randomGroup = GROUPS[Math.floor(Math.random() * GROUPS.length)];
+                    const voteRef = doc(db, "votes", award.id);
+                    simBatch.set(voteRef, { [randomGroup.id]: increment(1) }, { merge: true });
+                  }
+                });
+                await simBatch.commit();
+              } catch (e) {
+                console.error("Simulation error", e);
+              }
+            }, 800);
+          } else {
+            // Stop simulation
+            if (simulationIntervalRef.current) {
+              clearInterval(simulationIntervalRef.current);
+              simulationIntervalRef.current = null;
+            }
+          }
+        } catch (err) {
+          console.error("Error toggling simulation:", err);
+        }
       } else if (modalAction === "ceremony") {
         setCeremonyAwardIndex(0);
         triggerConfetti();

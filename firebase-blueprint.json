@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "VoteRecord": {
+      "title": "VoteRecord",
+      "description": "Stores the vote counts for an award",
+      "type": "object",
+      "properties": {
+        "g1": { "type": "number" },
+        "g2": { "type": "number" },
+        "g3": { "type": "number" },
+        "g4": { "type": "number" },
+        "g5": { "type": "number" },
+        "g6": { "type": "number" },
+        "g7": { "type": "number" }
+      }
+    },
+    "AppState": {
+      "title": "AppState",
+      "description": "Stores global app state like simulation status",
+      "type": "object",
+      "properties": {
+        "isSimulating": { "type": "boolean" }
+      }
+    }
+  },
+  "firestore": {
+    "/votes/{awardId}": {
+      "schema": { "$ref": "#/entities/VoteRecord" },
+      "description": "Vote counts for each award"
+    },
+    "/appState/{docId}": {
+      "schema": { "$ref": "#/entities/AppState" },
+      "description": "Global application state"
+    }
+  }
+}
