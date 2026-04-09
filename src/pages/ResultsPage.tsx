@@ -12,6 +12,7 @@ export default function ResultsPage() {
   const [groups] = useState<Group[]>(GROUPS);
   const [awards] = useState<Award[]>(AWARDS);
   const [votes, setVotes] = useState<Votes>({});
+  const [totalVoters, setTotalVoters] = useState<number>(0);
   const [isSimulating, setIsSimulating] = useState(false);
   
   // Modal state
@@ -29,9 +30,16 @@ export default function ResultsPage() {
     // Listen to votes
     const unsubscribeVotes = onSnapshot(collection(db, "votes"), (snapshot) => {
       const rawVotes: Votes = {};
+      let maxTotal = 0;
       snapshot.forEach((doc) => {
-        rawVotes[doc.id] = doc.data();
+        const data = doc.data();
+        rawVotes[doc.id] = data;
+        const currentAwardTotal = Object.values(data).reduce((a: any, b: any) => a + (typeof b === 'number' ? b : 0), 0);
+        if (currentAwardTotal > maxTotal) {
+          maxTotal = currentAwardTotal;
+        }
       });
+      setTotalVoters(maxTotal);
       setVotes(getAdjustedVotes(rawVotes));
     });
 
@@ -352,7 +360,6 @@ export default function ResultsPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {awards.map((award, index) => {
             const awardVotes = votes[award.id] || {};
-            const totalVotes = (Object.values(awardVotes) as number[]).reduce((a, b) => a + b, 0);
             const maxVotes = Math.max(...(Object.values(awardVotes) as number[]), 1);
             
             // Sort groups by votes descending and take only top 3
@@ -378,12 +385,12 @@ export default function ResultsPage() {
                     </h2>
                     <div className="flex items-center gap-1.5 rounded-full bg-white px-2 py-0.5 text-xs font-medium text-zinc-600 border border-zinc-200 shadow-sm shrink-0">
                       <Users size={12} />
-                      <span>{totalVotes}</span>
+                      <span>{totalVoters}</span>
                     </div>
                   </div>
                 </div>
-                <div className="p-4 flex-1 flex flex-col justify-center gap-4">
-                  <AnimatePresence>
+                <div className="p-4 flex-1 flex flex-col justify-center gap-4 min-h-[220px]">
+                  <AnimatePresence mode="popLayout">
                     {sortedGroups.map((group, groupIndex) => {
                       const groupVotes = awardVotes[group.id] || 0;
                       const racePercentage = Math.max((groupVotes / maxVotes) * 100, 15);

@@ -31,7 +31,7 @@ function DraggableGroup({ group, className }: { group: Group; className?: string
       {...listeners}
       {...attributes}
       className={cn(
-        "relative flex items-center gap-2 lg:gap-3 rounded-xl border bg-white p-2 lg:p-3 text-left shadow-sm transition-all touch-none",
+        "relative flex items-center gap-2 lg:gap-3 rounded-xl border bg-white p-2 lg:p-3 text-left shadow-sm transition-all touch-none select-none",
         isDragging ? "opacity-50 ring-2 ring-indigo-500" : "border-zinc-200 hover:border-indigo-300 hover:shadow-md cursor-grab active:cursor-grabbing",
         className
       )}
@@ -229,7 +229,7 @@ export default function VotingPage() {
                 className={cn(
                   "lg:sticky lg:top-8 transition-all",
                   "border-t lg:border rounded-t-2xl lg:rounded-2xl p-4 lg:p-6",
-                  isPoolOver ? "border-indigo-300 bg-indigo-50/95" : "border-zinc-200 bg-white/95 backdrop-blur-md lg:bg-white",
+                  isPoolOver ? "border-indigo-300 bg-indigo-50/95" : "border-zinc-300 bg-zinc-100/95 backdrop-blur-md lg:bg-white lg:border-zinc-200",
                   "lg:min-h-[300px] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] lg:shadow-none"
                 )}
               >
