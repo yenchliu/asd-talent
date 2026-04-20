@@ -1,11 +1,11 @@
 export const GROUPS = [
-  { id: "g1", name: "The Greatest Showman", imageUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=200&h=200" },
+  { id: "g1", name: "The Greatest Showman", imageUrl: "https://loremflickr.com/200/200/violin,music?lock=21" },
   { id: "g2", name: "沉默是金", imageUrl: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&q=80&w=200&h=200" },
   { id: "g3", name: "ASD男孩", imageUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&q=80&w=200&h=200" },
   { id: "g4", name: "自彈自唱", imageUrl: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&q=80&w=200&h=200" },
   { id: "g5", name: "ASD舞力全開", imageUrl: "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=200&h=200" },
   { id: "g6", name: "串燒歌曲", imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=200&h=200" },
-  { id: "g7", name: "Rolling in the Deep", imageUrl: "https://images.unsplash.com/photo-1516280440502-a2fc69a16bf8?auto=format&fit=crop&q=80&w=200&h=200" },
+  { id: "g7", name: "Rolling in the Deep", imageUrl: "https://loremflickr.com/200/200/violin,music?lock=31" },
 ];
 
 export const AWARDS = [
