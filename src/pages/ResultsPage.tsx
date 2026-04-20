@@ -246,10 +246,16 @@ export default function ResultsPage() {
             <img 
               src={winner.imageUrl} 
               alt={winner.name}
+              referrerPolicy="no-referrer"
               className="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover border-8 border-white shadow-2xl mb-8"
             />
-            <h1 className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-300 drop-shadow-lg">
+            <h1 className="text-5xl md:text-7xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-300 drop-shadow-lg text-center leading-tight">
               {winner.name}
+              {winner.subName && (
+                <div className="text-2xl md:text-3xl font-medium text-white/80 mt-2 tracking-wide">
+                  {winner.subName}
+                </div>
+              )}
             </h1>
           </motion.div>
         </motion.div>
@@ -420,6 +426,9 @@ export default function ResultsPage() {
                           <div className="mb-1.5 flex items-center justify-between text-xs">
                             <span className={cn("font-semibold truncate pr-2", isLeader ? "text-indigo-700" : "text-zinc-700")}>
                               {group.name}
+                              {group.subName && (
+                                <span className="ml-2 font-normal text-zinc-400">({group.subName})</span>
+                              )}
                             </span>
                             <span className="font-mono font-bold text-zinc-500 shrink-0">
                               {groupVotes} pts
@@ -443,6 +452,7 @@ export default function ResultsPage() {
                                 <img
                                   src={group.imageUrl}
                                   alt={group.name}
+                                  referrerPolicy="no-referrer"
                                   className={cn(
                                     "h-8 w-8 rounded-full object-cover border-2 bg-white z-10 relative",
                                     isLeader ? "border-indigo-100 shadow-lg" : "border-white shadow-sm"

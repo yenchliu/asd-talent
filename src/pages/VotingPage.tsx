@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Award, Group } from "../types";
 import { GROUPS, AWARDS } from "../lib/constants";
@@ -19,7 +19,7 @@ import {
   DragOverlay,
 } from "@dnd-kit/core";
 
-function DraggableGroup({ group, className }: { group: Group; className?: string }) {
+const DraggableGroup: React.FC<{ group: Group; className?: string }> = ({ group, className }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: group.id,
     data: group,
@@ -42,20 +42,26 @@ function DraggableGroup({ group, className }: { group: Group; className?: string
       <img
         src={group.imageUrl}
         alt={group.name}
+        referrerPolicy="no-referrer"
         className="h-10 w-10 lg:h-12 lg:w-12 rounded-full object-cover border border-zinc-100 pointer-events-none shrink-0"
       />
-      <span className="font-medium text-sm lg:text-base text-zinc-700 pointer-events-none truncate">{group.name}</span>
+      <div className="flex flex-col min-w-0 pointer-events-none">
+        <span className="font-bold text-sm lg:text-base text-zinc-900 truncate tracking-tight">{group.name}</span>
+        {group.subName && (
+          <span className="text-[10px] lg:text-xs text-zinc-500 truncate leading-tight">{group.subName}</span>
+        )}
+      </div>
     </div>
   );
 }
 
-function DroppableAward({
-  award,
-  assignedGroup,
-}: {
+const DroppableAward: React.FC<{
   award: Award;
   assignedGroup: Group | null;
-}) {
+}> = ({
+  award,
+  assignedGroup,
+}) => {
   const { setNodeRef, isOver } = useDroppable({
     id: `award-${award.id}`,
     data: { type: "award", awardId: award.id },
@@ -161,14 +167,16 @@ export default function VotingPage() {
     
     try {
       // Submit votes using transactions or batch writes
-      for (const [awardId, groupId] of Object.entries(selections)) {
+      for (const entry of Object.entries(selections)) {
+        const awardId = entry[0];
+        const gId = entry[1] as string;
         const voteRef = doc(db, "votes", awardId);
         await runTransaction(db, async (transaction) => {
           const voteDoc = await transaction.get(voteRef);
           if (!voteDoc.exists()) {
-            transaction.set(voteRef, { [groupId]: 1 });
+            transaction.set(voteRef, { [gId]: 1 });
           } else {
-            transaction.update(voteRef, { [groupId]: increment(1) });
+            transaction.update(voteRef, { [gId]: increment(1) });
           }
         });
       }
@@ -239,7 +247,7 @@ export default function VotingPage() {
                 </h3>
                 <div className="flex flex-row lg:flex-col gap-3 overflow-x-auto pb-2 lg:pb-0 snap-x">
                   {unassignedGroups.length > 0 ? (
-                    unassignedGroups.map((group) => (
+                    unassignedGroups.map((group: Group) => (
                       <DraggableGroup key={group.id} group={group} className="snap-start shrink-0 w-48 lg:w-auto" />
                     ))
                   ) : (
@@ -307,9 +315,15 @@ export default function VotingPage() {
             <img
               src={activeGroup.imageUrl}
               alt={activeGroup.name}
+              referrerPolicy="no-referrer"
               className="h-12 w-12 rounded-full object-cover border border-zinc-100"
             />
-            <span className="font-medium text-zinc-700">{activeGroup.name}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-zinc-900 leading-tight">{activeGroup.name}</span>
+              {activeGroup.subName && (
+                <span className="text-xs text-zinc-500">{activeGroup.subName}</span>
+              )}
+            </div>
           </div>
         ) : null}
       </DragOverlay>
