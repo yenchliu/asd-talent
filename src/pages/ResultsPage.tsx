@@ -244,7 +244,7 @@ export default function ResultsPage() {
             className="flex flex-col items-center"
           >
             <img 
-              src={`${import.meta.env.BASE_URL}${winner.imageUrl.startsWith('http') ? '' : ''}${winner.imageUrl}`} 
+              src={winner.imageUrl} 
               alt={winner.name}
               referrerPolicy="no-referrer"
               className="w-48 h-48 md:w-64 md:h-64 rounded-full object-cover border-8 border-white shadow-2xl mb-8"
@@ -450,7 +450,7 @@ export default function ResultsPage() {
                             >
                               <div className="relative">
                                 <img
-                                  src={`${import.meta.env.BASE_URL}${group.imageUrl.startsWith('http') ? '' : ''}${group.imageUrl}`}
+                                  src={group.imageUrl}
                                   alt={group.name}
                                   referrerPolicy="no-referrer"
                                   className={cn(

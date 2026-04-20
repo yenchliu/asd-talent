@@ -5,7 +5,7 @@ export const GROUPS = [
   { id: "g4", name: "Lonely Poet", subName: "木吉他自彈自唱", imageUrl: "https://loremflickr.com/200/200/acoustic,guitar,man?lock=5" },
   { id: "g5", name: "Rhythm Squad", subName: "Group of Dancers", imageUrl: "https://loremflickr.com/200/200/group,dancers?lock=1" },
   { id: "g6", name: "Electric Rush", subName: "電吉他自彈自唱", imageUrl: "https://loremflickr.com/200/200/electric,guitar,man?lock=1" },
-  { id: "g7", name: "Acoustix", subName: "Acoustic Band", imageUrl: "rolling_in_the_deep.png" },
+  { id: "g7", name: "Acoustix", subName: "Acoustic Band", imageUrl: "https://loremflickr.com/200/200/acoustic,band?lock=1" },
 ];
 
 export const AWARDS = [
