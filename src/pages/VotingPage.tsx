@@ -40,7 +40,7 @@ const DraggableGroup: React.FC<{ group: Group; className?: string }> = ({ group,
         <GripVertical size={18} className="lg:w-5 lg:h-5" />
       </div>
       <img
-        src={group.imageUrl}
+        src={`${import.meta.env.BASE_URL}${group.imageUrl.startsWith('http') ? '' : ''}${group.imageUrl}`}
         alt={group.name}
         referrerPolicy="no-referrer"
         className="h-10 w-10 lg:h-12 lg:w-12 rounded-full object-cover border border-zinc-100 pointer-events-none shrink-0"
@@ -313,7 +313,7 @@ export default function VotingPage() {
               <GripVertical size={20} />
             </div>
             <img
-              src={activeGroup.imageUrl}
+              src={`${import.meta.env.BASE_URL}${activeGroup.imageUrl.startsWith('http') ? '' : ''}${activeGroup.imageUrl}`}
               alt={activeGroup.name}
               referrerPolicy="no-referrer"
               className="h-12 w-12 rounded-full object-cover border border-zinc-100"
