@@ -9,7 +9,7 @@ import ResultsPage from "./pages/ResultsPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/asd-talent">
       <Routes>
         <Route path="/" element={<VotingPage />} />
         <Route path="/results" element={<ResultsPage />} />
