@@ -5,7 +5,7 @@ export const GROUPS = [
   { id: "g4", name: "吉他詩人", subName: "讓", imageUrl: "images/acoustic_guitarist.png" },
   { id: "g5", name: "防彈少年少女團", subName: "Baby shark舞蹈", imageUrl: "images/dance_group.png" },
   { id: "g6", name: "Zero Void Man", subName: "Void", imageUrl: "images/one_man_medley.png" },
-  { id: "g7", name: "Acoustix", subName: "Acoustic Band", imageUrl: "images/rolling_in_the_deep.png" },
+  { id: "g7", name: "ASD Band", subName: "Rolling in the Deep", imageUrl: "images/rolling_in_the_deep.png" },
 ];
 
 export const AWARDS = [
