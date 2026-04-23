@@ -1,16 +1,16 @@
 export const GROUPS = [
-  { id: "g1", name: "The Dreamers", subName: "Violin Trio & Pianist", imageUrl: "https://loremflickr.com/200/200/violin,pianist,quartet?lock=1" },
-  { id: "g2", name: "Soul Brothers", subName: "2 Men Singing", imageUrl: "https://loremflickr.com/200/200/singing,men,duet?lock=1" },
-  { id: "g3", name: "ASD Boys", subName: "熱情森巴舞", imageUrl: "https://loremflickr.com/200/200/choir,men?lock=1" },
-  { id: "g4", name: "Lonely Poet", subName: "木吉他自彈自唱", imageUrl: "https://loremflickr.com/200/200/acoustic,guitar,man?lock=5" },
-  { id: "g5", name: "Rhythm Squad", subName: "Group of Dancers", imageUrl: "https://loremflickr.com/200/200/group,dancers?lock=1" },
-  { id: "g6", name: "Electric Rush", subName: "電吉他自彈自唱", imageUrl: "https://loremflickr.com/200/200/electric,guitar,man?lock=1" },
+  { id: "g1", name: "ASD交響樂團", subName: "Canon in D", imageUrl: "images/canon_trio_piano.png" },
+  { id: "g2", name: "陳默是金", subName: "沉默是金", imageUrl: "images/沉默是金.png" },
+  { id: "g3", name: "ASD Boys", subName: "痴心絕對", imageUrl: "images/ASD_boys.png" },
+  { id: "g4", name: "吉他詩人", subName: "讓", imageUrl: "images/acoustic_guitarist.png" },
+  { id: "g5", name: "防彈少年少女團", subName: "Baby shark舞蹈", imageUrl: "images/dance_group.png" },
+  { id: "g6", name: "Zero Void Man", subName: "Void", imageUrl: "images/one_man_medley.png" },
   { id: "g7", name: "Acoustix", subName: "Acoustic Band", imageUrl: "images/rolling_in_the_deep.png" },
 ];
 
 export const AWARDS = [
   { id: "a1", name: "狂野音浪，炸裂全場獎" },
-  { id: "a2", name: "吉他詩人，才華橫溢獎" },
+  { id: "a2", name: "行走ＣＤ，才華橫溢獎" },
   { id: "a3", name: "青春男女，最佳活力獎" },
   { id: "a4", name: "律動全球，聽覺盛宴獎" },
   { id: "a5", name: "琴瑟合鳴，藝境巔峰獎" },
