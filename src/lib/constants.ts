@@ -15,7 +15,7 @@ export const AWARDS = [
   { id: "a4", name: "律動全球，聽覺盛宴獎" },
   { id: "a5", name: "琴瑟合鳴，藝境巔峰獎" },
   { id: "a6", name: "時代金曲，傳奇演繹獎" },
-  { id: "a7", name: "三維鼎立，聲動天籟獎" },
+  { id: "a7", name: "三雄鼎立，聲動天籟獎" },
 ];
 
 export const MAX_VOTERS = 105;
